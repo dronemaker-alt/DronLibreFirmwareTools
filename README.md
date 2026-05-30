@@ -140,6 +140,80 @@ DronLibreFirmwareTools is an analysis-only toolkit designed to inspect firmware 
 - `tests/` — unit and integration test scaffolding
 - `samples/` — sample firmware inputs, notes, or expected file layouts
 - `reports/` — generated analysis outputs and example reports
+## Future Development Roadmap
+
+### Vision
+
+Create a platform-agnostic drone maintenance, recovery, firmware analysis, and diagnostic suite supporting DJI, Ardupilot, Betaflight, INAV, STM32, ESP32, NXP K66, and future DronLibre flight controllers.
+
+### Planned Features
+
+#### Firmware Analysis
+
+* Automatic aircraft identification
+* Flight controller detection
+* Processor identification
+* Firmware version extraction
+* Firmware signature analysis
+
+#### Firmware Database
+
+* Known firmware signature library
+* Version compatibility tracking
+* Supported hardware database
+* Firmware comparison tools
+
+#### Firmware Recovery
+
+* Firmware backup before update
+* Firmware restore capability
+* Recovery mode support
+* Firmware integrity verification
+
+#### Live Diagnostics
+
+* Battery voltage monitoring
+* GPS health and lock status
+* IMU health monitoring
+* Compass diagnostics
+* Radio link quality
+* Motor output monitoring
+* Temperature monitoring
+* System health reporting
+
+#### Rescue Integration
+
+* Direct integration with DronLibre-Rescue-Logs
+* Automatic case report generation
+* Diagnostic report archiving
+* Firmware backup storage
+* Aircraft history tracking
+
+### Initial Platform Targets
+
+#### DJI
+
+* Mini Series
+* Mavic Series
+* Phantom Series
+* Inspire Series
+
+#### Open Source Platforms
+
+* Ardupilot
+* Betaflight
+* INAV
+
+#### DronLibre Hardware
+
+* STM32 Flight Controllers
+* ESP32 Companion Systems
+* NXP K66 Flight Controllers
+* Future Aesir Flight Systems
+
+### Long-Term Goal
+
+Build a unified drone maintenance and recovery platform combining the capabilities of DJI Assistant, Mission Planner, Betaflight Configurator, and INAV Configurator while adding integrated rescue logging, firmware analysis, aircraft recovery management, and support for future DronLibre hardware.
 
 ## Getting Started
 
