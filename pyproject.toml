@@ -1,0 +1,25 @@
+[project]
+name = "dronlibrefirmwaretools"
+version = "0.1.0"
+description = "Firmware archaeology and analysis toolkit for legally obtained DJI and drone firmware files."
+authors = ["DronLibre Firmware Tools"]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[project.urls]
+"Home" = "https://example.com/dronlibrefirmwaretools"
+
+[project.dependencies]
+python-magic = "^0.4.27"
+construct = "^2.10.67"
+pyyaml = "^6.0"
+rich = "^13.0"
+
+[project.scripts]
+dronlibrefirmwaretools = "src.cli:main"
+run-samples = "run_samples:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

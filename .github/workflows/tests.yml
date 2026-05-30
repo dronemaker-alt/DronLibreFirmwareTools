@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pytest
+
+      - name: Run pytest
+        run: |
+          mkdir -p test-results
+          python -m pytest --junitxml=test-results/results.xml
+
+      - name: Validate parser modules
+        run: |
+          python - <<'PY'
+          import importlib, pkgutil
+          import src.parsers as parsers
+
+          modules = [name for _, name, _ in pkgutil.iter_modules(parsers.__path__)]
+          if not modules:
+              raise SystemExit('No parser modules found in src.parsers')
+
+          for name in modules:
+              importlib.import_module(f"src.parsers.{name}")
+              print(f"Imported parser module: {name}")
+          PY
+
+      - name: Verify sample firmware files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          required = [
+              Path('samples/input/sample_dji_firmware.bin'),
+              Path('samples/input/sample_betaflight_firmware.bin'),
+              Path('samples/input/sample_inav_firmware.bin'),
+              Path('samples/input/sample_ardupilot_firmware.bin'),
+              Path('samples/input/sample_esp32_firmware.bin'),
+              Path('samples/input/sample_stm32_firmware.bin'),
+          ]
+          missing = [str(p) for p in required if not p.exists()]
+          if missing:
+              raise FileNotFoundError(f"Missing sample firmware files: {missing}")
+          print('All required sample firmware files are present.')
+          PY
+
+      - name: Run sample firmware scan
+        run: |
+          python -m src.cli analyze-all --input samples/input --output reports/test-reports
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/results.xml
+            reports/test-reports

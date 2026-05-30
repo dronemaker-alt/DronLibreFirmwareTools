@@ -1,0 +1,4 @@
+python-magic>=0.4.27
+construct>=2.10.67
+pyyaml>=6.0
+rich>=13.0
