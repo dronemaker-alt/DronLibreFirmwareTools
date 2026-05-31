@@ -1,224 +1,139 @@
 # DronLibreFirmwareTools
 
-DronLibreFirmwareTools is a firmware archaeology and analysis toolkit for legally obtained drone firmware (for example DJI, PX4, ArduPilot) and related binary packages. This project is strictly analysis-only: it inspects, extracts metadata, and produces reports without modifying, signing, flashing, or attempting to bypass firmware protections.
+DronLibreFirmwareTools is an analysis-only firmware archaeology and reporting toolkit for legally obtained drone firmware and related binary packages.
+
+The project is meant to help with safe inspection, documentation, board identification, metadata extraction, and repeatable reporting. It does not modify, patch, sign, flash, unlock, or bypass firmware protections.
 
 ## Quick facts
 
-- Analysis-only: we never modify firmware, sign, flash, or bypass protections.
-- Prototype implementation in Python (see `src/`).
-- Place input firmware in `samples/input/` and run the analyzer to produce reports in `reports/`.
+- Project owner: `dronemaker-alt`
+- Default branch: `master`
+- Focus: read-only firmware analysis and drone recovery documentation
+- Prototype implementation: Python modules under `src/`
+- Related repository: `DronLibre-Rescue-Logs`
 
 ## Goals
 
-- Provide safe, repeatable analysis workflows for firmware researchers and forensics.
-- Identify file types, compute secure hashes, extract printable strings, and estimate entropy.
-- Detect known archive/container formats and discover embedded files when possible (read-only).
-- Produce human-friendly and machine-readable reports (Markdown, JSON).
+- Identify file types and firmware package structure.
+- Compute secure hashes for traceability.
+- Extract printable strings for safe inspection.
+- Estimate entropy to locate compressed or encrypted regions.
+- Detect known archive, container, image, and executable signatures.
+- Generate human-readable and machine-readable reports.
+- Keep a clean paper trail before working with unknown boards or firmware files.
 
-## Architecture overview
+## Project layout
 
-The repository follows a small, modular layout:
+- `src/` - core Python modules
+  - `analyzer.py` - coordinates scanning and analysis
+  - `file_signatures.py` - known magic bytes and signature detection
+  - `report_generator.py` - Markdown and JSON report generation
+  - `utils.py` - hashing, entropy, string extraction, and helpers
+- `docs/` - project documentation and design notes
+- `samples/input/` - local firmware input folder
+- `reports/` - generated analysis reports
+- `tests/` - unit tests and lightweight checks
 
-- `src/` — core Python modules:
-  - `analyzer.py` — orchestrates scanning and analysis
-  - `file_signatures.py` — known magic bytes / signature detection
-  - `report_generator.py` — Markdown/JSON report generation
-  - `utils.py` — hashing, entropy, string extraction, and helpers
-- `samples/input/` — drop firmware files here for analysis
-- `reports/` — generated analysis outputs
-- `tests/` — unit tests and lightweight integration checks
-- `docs/` — project documentation and design notes
+## Supported and recognized formats
 
-## Supported / Recognised Formats (examples)
+The analyzer is intended to detect common container and binary signatures. Current or planned examples include:
 
-The analyzer detects common container and binary signatures and is extensible for more formats. Examples included by default:
-
-- ZIP (PK\x03\x04, PK\x05\x06)
+- ZIP
 - TAR / ustar
 - GZIP / BZIP2 / XZ / LZMA
-- 7z, RAR
-- SquashFS (future)
-- ELF (Linux executables / firmware), PE (Windows executables)
-- PNG, JPEG, BMP, PDF
-- Common vendor headers (e.g., DJI markers) — detection is heuristic and does not imply full parsing
+- 7z and RAR
+- ELF and PE executable formats
+- PNG, JPEG, BMP, and PDF
+- Heuristic vendor markers, including DJI-style markers when safely detectable
+- Embedded filesystem candidates such as SquashFS and YAFFS as future work
 
-If you need additional proprietary or vendor-specific formats, please file an issue and provide a small, legally shareable sample or format notes.
+## Basic usage
 
-## Usage (Quick start)
-
-1. Create a virtual environment and install dependencies:
+Create and activate a Python virtual environment, then install dependencies:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-2. Place firmware files into `samples/input/`.
+On Windows PowerShell, activation usually looks like this:
 
-3. Run the analyzer (default reads `samples/input`):
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+Place legally obtained firmware files in `samples/input/`, then run the analyzer:
 
 ```bash
 python -m src.cli samples/input --output reports
 ```
 
-4. Open `reports/index.md` and the per-file Markdown reports in `reports/`.
+Expected output:
 
-## Output
+- `reports/analysis_report.json` - machine-readable summary
+- `reports/index.md` - report index
+- `reports/<file>.md` - per-file report with size, hashes, detected signatures, entropy estimate, and sample strings
 
-- `reports/analysis_report.json` — machine-readable summary of all files analyzed.
-- `reports/index.md` — human-readable index linking to per-file Markdown reports.
-- `reports/<file>.md` — detailed per-file reports including size, SHA256, detected signatures, entropy estimate, and sample strings.
+## Manual repository health check
+
+Before testing unknown boards or firmware packages:
+
+1. Confirm the board identity, chip family, USB port, and visible markings.
+2. Capture initial serial output before flashing or changing anything.
+3. Save screenshots, terminal output, or copied serial logs.
+4. Put session notes under `docs/` or the related rescue-log repository.
+5. Keep firmware samples out of public commits unless they are legally shareable.
+6. Treat all firmware handling as read-only unless you are working on your own hardware and have a clear recovery path.
 
 ## Roadmap
 
-See [roadmap.md](roadmap.md) for the full project roadmap. High-level plans include:
+### Firmware analysis
 
-- Expand signature database and container extraction plugins (read-only).
-- Add CPU/architecture heuristics (ARM, MIPS, x86, RISC-V) and section analysis.
-- Add more robust handling of SquashFS, YAFFS, and other embedded filesystems.
-- Add richer reporting (CSV, enhanced JSON schema) and integration tests.
+- Aircraft and board family identification
+- Firmware version extraction
+- Processor and architecture hints
+- Firmware package comparison
+- Signature library expansion
+- Read-only container extraction where legally and technically appropriate
 
-## Contribution guidelines
+### Reporting and database work
 
-We welcome contributions that improve analysis capability, documentation, and safety. Please follow these steps:
+- Known firmware signature library
+- Version compatibility notes
+- Supported hardware database
+- Markdown, JSON, and CSV reports
+- Integration with DronLibre rescue case notes
 
-1. Open an issue to discuss significant features or format support before large work.
-2. Fork the repository and create topic branches for features or fixes.
-3. Keep changes small and focused; include tests in `tests/`.
-4. Run the test suite locally:
+### Live diagnostics documentation
 
-```bash
-python -m pytest -q
-```
+Future documentation may cover safe observation and logging of:
 
-5. Submit a pull request with a clear description and link to any sample data (if shareable).
+- Battery voltage
+- GPS health and lock status
+- IMU health indicators
+- Compass status
+- Radio link quality
+- Temperature readings
+- System health reports
 
-Coding style: follow existing project patterns (type hints, small modules). Add tests for new detection logic.
+### Initial platform targets
 
-## Legal & Safety disclaimer
+- DJI Mini, Mavic, Phantom, and Inspire families
+- ArduPilot
+- Betaflight
+- INAV
+- STM32 flight controllers
+- ESP32 companion systems
+- NXP K66 / Aesir flight-system experiments
 
-- This project is intended for analysis, research, and forensic purposes only. Do not use it to circumvent device security, sign, modify, flash, or otherwise tamper with firmware you are not authorized to handle.
-- You must possess legal rights to any firmware you analyze. The authors and maintainers are not responsible for misuse of this toolkit.
-- If in doubt about the legality of analyzing a given firmware image in your jurisdiction, consult legal counsel.
+## Safety and legal boundary
+
+This repository is for analysis, research, repair documentation, and forensic-style inspection of firmware you are authorized to handle.
+
+Do not use this project to bypass access controls, defeat firmware protections, unlock restricted features, modify vendor firmware, or flash unknown binaries onto aircraft that could create a safety hazard.
 
 ## License
 
 This project is provided under the MIT license. See `LICENSE` for details.
-
----
-
-If you want, I can add CI badges, a contributing template, or a short demo workflow to the `docs/` next.
-# DronLibreFirmwareTools
-
-DronLibreFirmwareTools is a firmware archaeology and analysis toolkit for legally obtained drone firmware (e.g., DJI, PX4, ArduPilot) and related binary packages. This project is strictly analysis-only: it inspects, extracts metadata, and produces reports without modifying, signing, flashing, or attempting to bypass firmware protections.
-
-## Purpose
-
-If you want, I can add CI badges, a contributing template, or a short demo workflow to the `docs/` next.
-# DronLibreFirmwareTools
-
-Firmware archaeology and analysis toolkit for legally obtained DJI firmware files and other drone firmware packages.
-
-## Purpose
-
-DronLibreFirmwareTools is an analysis-only toolkit designed to inspect firmware packages without modifying, patching, signing, flashing, or bypassing protections. The focus is on data extraction, metadata discovery, and reporting.
-
-## Initial Goals
-
-- Accept firmware files placed in an input folder
-- Identify file type and metadata
-- Extract known archive/container formats when possible
-- Generate a report of discovered files, sizes, hashes, strings, and possible processor/architecture clues
-- Never modify, patch, sign, flash, or bypass firmware protections
-- Keep this toolkit analysis-only
-
-## Project Layout
-
-- `docs/` — documentation and design notes
-- `src/` — Python source code
-- `tests/` — unit and integration test scaffolding
-- `samples/` — sample firmware inputs, notes, or expected file layouts
-- `reports/` — generated analysis outputs and example reports
-## Future Development Roadmap
-
-### Vision
-
-Create a platform-agnostic drone maintenance, recovery, firmware analysis, and diagnostic suite supporting DJI, Ardupilot, Betaflight, INAV, STM32, ESP32, NXP K66, and future DronLibre flight controllers.
-
-### Planned Features
-
-#### Firmware Analysis
-
-* Automatic aircraft identification
-* Flight controller detection
-* Processor identification
-* Firmware version extraction
-* Firmware signature analysis
-
-#### Firmware Database
-
-* Known firmware signature library
-* Version compatibility tracking
-* Supported hardware database
-* Firmware comparison tools
-
-#### Firmware Recovery
-
-* Firmware backup before update
-* Firmware restore capability
-* Recovery mode support
-* Firmware integrity verification
-
-#### Live Diagnostics
-
-* Battery voltage monitoring
-* GPS health and lock status
-* IMU health monitoring
-* Compass diagnostics
-* Radio link quality
-* Motor output monitoring
-* Temperature monitoring
-* System health reporting
-
-#### Rescue Integration
-
-* Direct integration with DronLibre-Rescue-Logs
-* Automatic case report generation
-* Diagnostic report archiving
-* Firmware backup storage
-* Aircraft history tracking
-
-### Initial Platform Targets
-
-#### DJI
-
-* Mini Series
-* Mavic Series
-* Phantom Series
-* Inspire Series
-
-#### Open Source Platforms
-
-* Ardupilot
-* Betaflight
-* INAV
-
-#### DronLibre Hardware
-
-* STM32 Flight Controllers
-* ESP32 Companion Systems
-* NXP K66 Flight Controllers
-* Future Aesir Flight Systems
-
-### Long-Term Goal
-
-Build a unified drone maintenance and recovery platform combining the capabilities of DJI Assistant, Mission Planner, Betaflight Configurator, and INAV Configurator while adding integrated rescue logging, firmware analysis, aircraft recovery management, and support for future DronLibre hardware.
-
-## Getting Started
-
-1. Install dependencies: `python -m pip install -r requirements.txt`
-2. Place firmware files in `input/` or another configured source directory
-3. Run the analyzer from `src/`
-
-> This repository is a first prototype scaffold and does not yet include full firmware parsing support.
